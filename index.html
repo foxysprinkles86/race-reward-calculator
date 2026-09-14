@@ -474,7 +474,6 @@ function renderSummary(eventKey, result){
   const totalDisplay = eventKey === 'piggy'
     ? fmt(result.totalScore)
     : fmt(result.totalScore / 1e9, 2) + ' B';
-  const gapClass = result.gap < 0 ? 'neg' : 'pos';
 
   el.innerHTML = `
     <div class="stat hero"><div class="label">${totalLabel}</div><div class="value">${totalDisplay}</div></div>
@@ -482,7 +481,6 @@ function renderSummary(eventKey, result){
     <div class="stat"><div class="label">Coin Pot (M)</div><div class="value">${fmt(result.coinPot,2)}</div></div>
     <div class="stat"><div class="label">Spark Pot</div><div class="value">${fmt(result.sparkPot)}</div></div>
     <div class="stat"><div class="label">1st Place Stars</div><div class="value">${fmt(result.firstPlaceStars)}</div></div>
-    <div class="stat"><div class="label">Gap to Target</div><div class="value ${gapClass}">${fmt(result.gap)}</div></div>
   `;
 }
 

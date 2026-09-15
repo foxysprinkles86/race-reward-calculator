@@ -558,15 +558,15 @@
         <table>
           <thead>
             <tr>
-              <th>Place</th><th>Player</th><th>Lines</th><th>Reward %</th>
-              <th>Stars</th><th>Coins (M)</th><th>Sparks</th><th></th>
+              <th>Place</th><th>Player</th><th>Lines</th><th>Contrib. %</th><th>Reward %</th>
+              <th>Stars</th><th>Coins (M)</th><th>Sparks</th><th>Stars Gen.</th><th>Rec./Gen.</th><th></th>
             </tr>
           </thead>
           <tbody id="rows-piggy"></tbody>
         </table>
       </div>
     </div>
-    <div class="note">Star / Coin / Spark pots scale from the baseline pot (10.24M stars / 2554.7M coins / 1.02M sparks at a baseline total of 103,190 lines) as (Total ÷ Baseline) raised to a scaling exponent (1.08), fitted from real leaderboard data.</div>
+    <div class="note">Star / Coin / Spark pots scale from the baseline pot (10.24M stars / 2554.7M coins / 1.02M sparks at a baseline total of 103,190 lines) as (Total ÷ Baseline) raised to the scaling exponent above. Exponent 1.08 carries over from the Space Race fit — same game, same reward engine, so the same curve is applied here too; edit it if Piggy-specific leaderboard data ever suggests a different value. "Stars Gen." is what a place would earn from its raw score share at that pot, before the Reward Share curve — Rec./Gen. shows how much the curve boosts or discounts a place relative to that baseline.</div>
   </div>
 
   <!-- SPACE RACE -->
@@ -653,8 +653,8 @@
         <table>
           <thead>
             <tr>
-              <th>Place</th><th>Player</th><th>Distance (B)</th><th>Reward %</th>
-              <th>Stars</th><th>Coins (M)</th><th>Sparks</th><th></th>
+              <th>Place</th><th>Player</th><th>Distance (B)</th><th>Contrib. %</th><th>Reward %</th>
+              <th>Stars</th><th>Coins (M)</th><th>Sparks</th><th>Stars Gen.</th><th>Rec./Gen.</th><th></th>
             </tr>
           </thead>
           <tbody id="rows-space"></tbody>
@@ -766,15 +766,19 @@ function renderSummary(eventKey, result){
 function renderRows(eventKey, result){
   const tbody = document.getElementById('rows-' + eventKey);
   tbody.innerHTML = result.computed.map((r, i) => {
+    const ratioClass = r.ratio >= 1 ? 'ratio-good' : (r.ratio > 0 ? 'ratio-bad' : 'computed');
     return `
       <tr>
         <td class="place">${i+1}</td>
         <td class="name-cell"><input type="text" data-event="${eventKey}" data-idx="${i}" data-field="name" placeholder="—" value="${r.name}" oninput="updateField('${eventKey}',${i},'name',this.value)"></td>
         <td><input type="number" data-event="${eventKey}" data-idx="${i}" data-field="score" value="${r.score}" oninput="updateField('${eventKey}',${i},'score',this.value)"></td>
+        <td class="computed">${pct(r.contribution)}</td>
         <td><input type="number" data-event="${eventKey}" data-idx="${i}" data-field="share" step="0.001" value="${r.share}" oninput="updateField('${eventKey}',${i},'share',this.value)"></td>
         <td class="computed">${fmt(r.starsReward)}</td>
         <td class="computed">${fmt(r.coinsReward,2)}</td>
         <td class="computed">${fmt(r.sparksReward)}</td>
+        <td class="computed">${fmt(r.starsGenerated)}</td>
+        <td class="${ratioClass}">${r.ratio.toFixed(2)}x</td>
         <td class="rm"><button class="rm-btn" onclick="removeRow('${eventKey}',${i})" title="Remove player">✕</button></td>
       </tr>
     `;
@@ -1033,17 +1037,20 @@ function csvEscape(val){
 function exportCSV(eventKey){
   const result = computeEvent(eventKey);
   const scoreLabel = eventKey === 'piggy' ? 'Lines' : 'Distance (B)';
-  const header = ['Place','Player',scoreLabel,'Reward %','Stars','Coins (M)','Sparks'];
+  const header = ['Place','Player',scoreLabel,'Contribution %','Reward %','Stars','Coins (M)','Sparks','Stars Generated','Received/Generated'];
   const lines = [header.map(csvEscape).join(',')];
   result.computed.forEach((r, i) => {
     lines.push([
       i + 1,
       r.name || '',
       r.score,
+      (r.contribution * 100).toFixed(2) + '%',
       (r.share * 100).toFixed(3) + '%',
       Math.round(r.starsReward),
       r.coinsReward.toFixed(2),
-      Math.round(r.sparksReward)
+      Math.round(r.sparksReward),
+      Math.round(r.starsGenerated),
+      r.ratio.toFixed(2) + 'x'
     ].map(csvEscape).join(','));
   });
   const csv = lines.join('\n');

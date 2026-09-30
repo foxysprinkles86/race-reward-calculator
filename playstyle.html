@@ -181,7 +181,7 @@
   </form>
 
   <div class="card done" id="done" style="display:none">
-    <div class="boomwrap" aria-hidden="true"><img class="boomgif" id="doneGif" alt=""></div>
+    
     <h2>KA-BOOM. 🧨</h2>
     <p>Your answers have been delivered to the council.<br>The council is pleased. 🦆</p>
   </div>
@@ -323,7 +323,7 @@ document.getElementById('survey').addEventListener('submit', async e => {
     ]);
     hideLoader();
     form.style.display = 'none';
-    document.getElementById('doneGif').src = document.querySelector('.top .boomgif').src;
+    
     
     document.getElementById('done').style.display = 'block';
     setTimeout(() => { kaboom(50); rain(4000); }, 150);
